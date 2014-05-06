@@ -1,21 +1,36 @@
 import SocketServer
+import math
+import linecache
+import random
+
+generate = random.randint(1, 1000)
+chooseWord = (generate % 126)
+if (chooseWord == 0):
+	chooseWord = (chooseWord + 1)
+print chooseWord
+
+Word = linecache.getline('WordList.txt', chooseWord)
+print Word
 
 class MyTCPHandler(SocketServer.BaseRequestHandler):
-    """
-    The RequestHandler class for our server.
+	"""
+	The RequestHandler class for our server.
 
-    It is instantiated once per connection to the server, and must
-    override the handle() method to implement communication to the
-    client.
-    """
+	It is instantiated once per connection to the server, and must
+	override the handle() method to implement communication to the
+	client.
+	""" 	 
+		
 
-    def handle(self):
-        # self.request is the TCP socket connected to the client
-        self.data = self.request.recv(1024).strip()
-        print "{} wrote:".format(self.client_address[0])
-        print self.data
-        # just send back the same data, but upper-cased
-        self.request.sendall(self.data.upper())
+	def handle(self):
+		# self.request is the TCP socket connected to the client
+		self.data = self.request.recv(1024).strip()
+		#print chooseWord
+		print "{} wrote:".format(self.client_address[0])
+		print self.data
+		# just send back the same data, but upper-cased
+		self.request.sendall(self.data.upper())
+
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
