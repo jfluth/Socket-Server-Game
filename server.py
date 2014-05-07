@@ -1,43 +1,46 @@
 import SocketServer
+import socket
 import math
 import linecache
 import random
 
-generate = random.randint(1, 1000)
-chooseWord = (generate % 126)
-if (chooseWord == 0):
-	chooseWord = (chooseWord + 1)
-print chooseWord
-
-Word = linecache.getline('WordList.txt', chooseWord)
-print Word
-
-class MyTCPHandler(SocketServer.BaseRequestHandler):
-	"""
-	The RequestHandler class for our server.
-
-	It is instantiated once per connection to the server, and must
-	override the handle() method to implement communication to the
-	client.
-	""" 	 
+class MyServer():
+	
+	def __init__(self):
+	
+		generate = random.randint(1, 1000)
+		chooseWord = (generate % 126)
+		if (chooseWord == 0):
+			chooseWord = (chooseWord + 1)
+		self.Word = linecache.getline('WordList.txt', chooseWord)
+		print self.Word
 		
-
-	def handle(self):
-		# self.request is the TCP socket connected to the client
-		self.data = self.request.recv(1024).strip()
-		#print chooseWord
-		print "{} wrote:".format(self.client_address[0])
-		print self.data
-		# just send back the same data, but upper-cased
-		self.request.sendall(self.data.upper())
-
+	def match(self, data):
+		index = self.Word.find(data)
+		print data
+		print index
+		return index
 
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 9999
 
-    # Create the server, binding to localhost on port 9999
-    server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
+	HOST, PORT = "localhost", 9999
+	
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind((HOST, PORT))
+	sock.listen(1)
+	conn, addr = sock.accept()
+	print 'connected by', addr
+	server = MyServer()
+	conn.sendall(server.Word)
+	
+	while 1:
+		data = conn.recv(1024).strip()
+		if not data: break
+		Index = server.match(data)
+		if (Index < 0):
+			conn.sendall('nomatch')
+		else :
+			conn.sendall(str(Index) + "\n")
+	
+	conn.close()
 
-    # Activate the server; this will keep running until you
-    # interrupt the program with Ctrl-C
-    server.serve_forever()
