@@ -7,19 +7,34 @@ import random
 class MyServer():
 	
 	def __init__(self):
-	
-		generate = random.randint(1, 1000)
-		chooseWord = (generate % 126)
-		if (chooseWord == 0):
-			chooseWord = (chooseWord + 1)
-		self.Word = linecache.getline('WordList.txt', chooseWord)
-		print self.Word
+		generate = random.randint(1, 126)
+		self.puzzle = linecache.getline('WordList.txt', generate)
 		
+		self.total_Length = len(self.puzzle) - 1
+		self.player_score = 0
+		print self.puzzle
+		
+				
 	def match(self, data):
-		index = self.Word.find(data)
-		print data
-		print index
-		return index
+		index = 0
+		matches = 0
+		while index < len(self.puzzle):
+			index = self.puzzle.find(data, index)
+			if index == -1:
+				break
+			index += 1
+			if (index >= 0):
+				matches += 1
+				self.player_score += 1
+		#print index
+		#print self.player_score
+		return matches
+		
+	def isWinner():
+		if (self.numRight == self.score):
+			return 1
+		else:
+			return 0
 
 if __name__ == "__main__":
 
@@ -27,18 +42,18 @@ if __name__ == "__main__":
 	
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.bind((HOST, PORT))
-	sock.listen(1)
+	sock.listen(5)
 	conn, addr = sock.accept()
 	print 'connected by', addr
 	server = MyServer()
-	conn.sendall(server.Word)
+	conn.sendall(server.puzzle)
 	
 	while 1:
 		data = conn.recv(1024).strip()
 		if not data: break
 		Index = server.match(data)
 		if (Index < 0):
-			conn.sendall('nomatch')
+			conn.sendall(str(Index) + "\n")
 		else :
 			conn.sendall(str(Index) + "\n")
 	
