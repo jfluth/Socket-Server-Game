@@ -16,63 +16,84 @@ import sys
 from array import *
 
 
-HOST, PORT = "localhost", 9999
-
-total_Wrong = 0
-total_Right = 0
-current_Puzzle = array('c', [])
-
-# Create a socket (SOCK_STREAM means a TCP socket)
-print("connecting...")
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-
-	sock.connect((HOST, PORT))
-	print("connection established...\n")
-
-
-	Word = sock.recv(4096)
-	total_Length = len(Word) - 1
-	current_Puzzle.fromstring('_' * total_Length)
-	wordMask = ' '.join(current_Puzzle)
-	print wordMask
-	
-	while (total_Right < total_Length):
-		data = raw_input("Enter a guess: ")
-		sock.sendall(data + "\n")
-	
-
-		# Receive data from the server and shut down
-		received = sock.recv(1024)
-		received = int(received)
+# This class contains all the functions required for the
+# hangman game
+class hangman():
 	
 	
-		if (received < 0):
+
+	def connect(self):
+		# Create a socket and establish a connection
+		print("connecting...")
+		self.HOST, self.PORT = "localhost", 9999
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.connect((self.HOST, self.PORT))
+		print("connection established...\n")
+
+
+	def game_setup(self):
+		self.Word = self.sock.recv(4096)
+		self.total_Wrong = 0
+		self.total_Right = 0
+		self.current_Puzzle = array('c', [])
+		self.total_Length = len(self.Word) - 1
+		self.current_Puzzle.fromstring('_' * self.total_Length)
+		self.wordMask = ' '.join(self.current_Puzzle)
+		print self.wordMask	
+
+
+	def send_guess(self):
+		self.data = raw_input("Enter a guess: ")
+		self.sock.sendall(self.data + "\n")
+
+
+	def get_result(self):
+		self.received = self.sock.recv(1024)
+		self.received = int(self.received)
+		
+		
+	def update_game_state(self):
+		if (self.received < 0):
 			print("you guessed incorrectly...\n")
-			total_Wrong += 1
+			self.total_Wrong += 1
 		
 		else:
 			print "you guessed correct...\n"
 			index = 0
-			while index < len(Word):
-				index = Word.find(data, index)
+			while index < len(self.Word):
+				index = self.Word.find(self.data, index)
 				if index == -1:
 					break
-				current_Puzzle[index] = data
+				self.current_Puzzle[index] = self.data
 				index += 1
-			total_Right += received 
+			self.total_Right += self.received 
 			
 			
-		wordMask = ' '.join(current_Puzzle)
-		print wordMask
-		
-		
-except (OverflowError, IOError):
-	print("Error Message")	
-			
-finally:
-    sock.close()
+		self.wordMask = ' '.join(self.current_Puzzle)
+		print self.wordMask
+	
 
-print "Sent:     {}".format(data)
-print "Received: {}".format(received)
+if __name__ == "__main__":
+	
+	game = hangman()
+	
+	try:
+		game.connect()
+		game.game_setup()
+	
+		while (game.total_Right < game.total_Length):
+			game.send_guess()
+			game.get_result()
+			game.update_game_state()	
+		
+		
+	except (OverflowError, IOError):
+		print("Error Message")	
+			
+	finally:
+		 game.sock.close()
+
+#print "Sent:     {}".format(data)
+#print "Received: {}".format(received)
+
+

@@ -1,5 +1,6 @@
 import SocketServer
 import socket
+import thread
 import math
 import linecache
 import random
@@ -9,7 +10,6 @@ class MyServer():
 	def __init__(self):
 		generate = random.randint(1, 126)
 		self.puzzle = linecache.getline('WordList.txt', generate)
-		
 		self.total_Length = len(self.puzzle) - 1
 		self.player_score = 0
 		print self.puzzle
@@ -27,7 +27,7 @@ class MyServer():
 				matches += 1
 				self.player_score += 1
 		#print index
-		#print self.player_score
+		print self.player_score
 		return matches
 		
 	def isWinner():
@@ -41,8 +41,10 @@ if __name__ == "__main__":
 	HOST, PORT = "localhost", 9999
 	
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock
 	sock.bind((HOST, PORT))
-	sock.listen(5)
+	sock.listen(2)
+	#sock.setblocking(0)
 	conn, addr = sock.accept()
 	print 'connected by', addr
 	server = MyServer()
