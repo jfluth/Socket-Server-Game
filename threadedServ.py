@@ -8,31 +8,30 @@ BUFF = 1024
 HOST = "localhost"
 PORT = 9999 
 
+global Puzzle
 
 class threaded_Serv():
 	
 	def __init__(self):
-		generate = random.randint(1, 126)
-		self.puzzle = linecache.getline('WordList.txt', generate)
-		self.total_Length = len(self.puzzle) - 1
+		self.total_Length = len(Puzzle) - 1
 		self.player_score = 0
-		print self.puzzle
+		print Puzzle
 		
 				
 	def match(self, data):
 		index = 0
 		matches = 0
-		while index < len(self.puzzle):
-			index = self.puzzle.find(data, index)
+		while index < len(Puzzle):
+			index = Puzzle.find(data, index)
 			if index == -1:
 				break
 			index += 1
 			if (index >= 0):
 				matches += 1
 				self.player_score += 1
-		#print index
 		print self.player_score
 		return matches
+		
 		
 	def isWinner(self):
 		if (self.numRight == self.score):
@@ -47,7 +46,7 @@ def response(key):
 
 def handler(clientsock,addr):
 	server = threaded_Serv()
-	clientsock.sendall(server.puzzle)
+	clientsock.sendall(Puzzle)
     
 	while 1:
 		data = clientsock.recv(1024).strip()
@@ -63,11 +62,16 @@ def handler(clientsock,addr):
 
 
 if __name__=='__main__':
+	generate = random.randint(1, 126)
+	Puzzle = linecache.getline('WordList.txt', generate)
+	print Puzzle
+	
 	ADDR = (HOST, PORT)
 	serversock = socket(AF_INET, SOCK_STREAM)
 	serversock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 	serversock.bind(ADDR)
 	serversock.listen(5)
+	
 	
 	while 1:
 		print 'waiting for connection... listening on port', PORT
