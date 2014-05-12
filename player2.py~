@@ -110,8 +110,6 @@ if __name__ == "__main__":
 		Label(master, text=game.total_Wrong, textvariable=game.total_Wrong).grid(row=6)
 		guess = Entry(master, textvariable=data)
 		guess.grid(row=9, column=1) 
-		d = list(data)
-		print d
 		guess_button = Button(master, text="Guess", command=game.send_guess)
 		#game.sock.sendall(data + "\n")
 		guess_button.grid(row=9, column=2)

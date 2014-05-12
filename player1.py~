@@ -14,14 +14,14 @@
 import socket
 import sys
 import subprocess
-import time
 from array import *
-from Tkinter import *
 
 
 # This class contains all the functions required for the
 # hangman game
 class hangman():
+	
+	
 
 	def connect(self):
 		# Create a socket and establish a connection
@@ -40,21 +40,17 @@ class hangman():
 		self.total_Length = len(self.Word) - 1
 		self.current_Puzzle.fromstring('_' * self.total_Length)
 		self.wordMask = ' '.join(self.current_Puzzle)
-		return self.wordMask	
+		print self.wordMask	
 
 
 	def send_guess(self):
-		#self.data = raw_input("Enter a guess: ")
-		print data
-		self.sock.sendall(data + "\n")
-		self.get_result()
+		self.data = raw_input("Enter a guess: ")
+		self.sock.sendall(self.data + "\n")
 
 
 	def get_result(self):
 		self.received = self.sock.recv(1024)
-		print self.received
-		#self.received = int(self.received)
-		self.update_game_state()
+		self.received = int(self.received)
 		
 		
 	def update_game_state(self):
@@ -63,20 +59,18 @@ class hangman():
 			print("you guessed incorrectly:\t{} times\n".format(self.total_Wrong))
 			if self.total_Wrong == 3:
 				print "You guessed wrong too many times...\n\nYou Lose!\n\n"
-				self.sock.close()
-				
+		
 		else:
-			print data
+			print ("you guessed correct!\nyour score is:\t{}".format(self.total_Right))
 			index = 0
 			while index < len(self.Word):
-				index = self.Word.find(data, index)
+				index = self.Word.find(self.data, index)
 				if index == -1:
 					break
-				
-				self.current_Puzzle[index] = data
+				self.current_Puzzle[index] = self.data
 				index += 1
 			self.total_Right += self.received 
-			print ("you guessed correct!\nyour score is:\t{}".format(self.total_Right))
+			
 			
 		self.wordMask = ' '.join(self.current_Puzzle)
 		print self.wordMask
@@ -88,35 +82,12 @@ if __name__ == "__main__":
 	
 	try:
 		game.connect()
-		cPuzzle = game.game_setup()
-		
-		
-		'''while (game.total_Right < game.total_Length):
+		game.game_setup()
+	
+		while (game.total_Right < game.total_Length):
 			game.send_guess()
 			game.get_result()
-			game.update_game_state()'''
-		
-		'''---------------------- GUI Setup ---------------------------------'''
-		
-		master = Tk()
-		data = StringVar() 
-		Label(master, text="Welcome to Hangman!\n\n").grid(row=1, sticky=W)
-		Puzzle = Message(master, text=cPuzzle, textvariable=cPuzzle, width=111)
-		Puzzle.grid(row=2, column=1, sticky=W)
-		Label(master, text="Enter Guess:").grid(row=9, sticky=W)
-		Label(master, text="Score: ").grid(row=5, sticky=W)
-		Label(master, text=game.total_Right, textvariable=game.total_Right).grid(row=5)
-		Label(master, text="Misses: ").grid(row=6, sticky=W)
-		Label(master, text=game.total_Wrong, textvariable=game.total_Wrong).grid(row=6)
-		guess = Entry(master, textvariable=data)
-		guess.grid(row=9, column=1) 
-		d = list(data)
-		print d
-		guess_button = Button(master, text="Guess", command=game.send_guess)
-		#game.sock.sendall(data + "\n")
-		guess_button.grid(row=9, column=2)
-		#time.sleep(2)  
-		mainloop()	
+			game.update_game_state()	
 		
 		
 	except (OverflowError, IOError):

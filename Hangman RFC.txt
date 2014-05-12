@@ -1,0 +1,73 @@
+
+
+
+ Jordan Fluth
+ May 7th, 2014
+ 
+
+						Multiplayer Network Hangman Game RFC
+
+
+Table of Contents:
+
+	1	Introduction............................................................... 1
+		1.1	Servers.............................................................. 1
+		1.2	Clients.............................................................. 1
+		1.3	Game Session......................................................... 1
+	
+	2	Message Details............................................................ 1
+		2.1	Connection........................................................... 1
+
+
+
+
+ 1		Introduction
+
+		The purpose of this document is to describe the protocol for a multiplayer network 
+		hangman game. This game can be played by a single player or by two players. Each 
+		player in the game will receive the same secret word from the server and who ever 
+		can guess it first wins, but to make too many wrong guesses otherwise you will lose 
+		and the other player will win whether they have solved the puzzle or not. 
+
+
+
+ 1.1	Servers
+
+		The server will be used as a point for clients to connect to and receive the current 
+		puzzle for the hangman game. The server is responsible for generating a hangman puzzle, 
+		keeping track of player scores, and notifying winners and losers. 
+
+
+
+ 1.2	Clients
+
+		A client is a player connecting to the server. Each client connects to the server and 
+		separate thread of the server is spun off for the connecting client. The server will 
+		support two clients at a time to play a hangman game.
+
+
+
+ 1.3	Game Session
+	
+		A game session is when is defined when two players have connected to the server and a 
+		new game is created. 
+
+
+
+ 2 	Message Details
+
+ 2.1 	Connection Details
+	
+		To start the server for hosting a hangman game, enter the following command on the 
+		command-line:
+
+			$: python threadedserver.py
+
+		To become a player in the hangman game and connect to the server, enter the one of 
+		the following commands on the command-line:
+
+			$: python player1.py 
+
+			$: python player2.py
+
+

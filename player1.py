@@ -13,6 +13,7 @@
 
 import socket
 import sys
+import subprocess
 from array import *
 
 
@@ -35,6 +36,7 @@ class hangman():
 		self.Word = self.sock.recv(4096)
 		self.total_Wrong = 0
 		self.total_Right = 0
+		self.guessed = array('c', [])
 		self.current_Puzzle = array('c', [])
 		self.total_Length = len(self.Word) - 1
 		self.current_Puzzle.fromstring('_' * self.total_Length)
@@ -44,7 +46,12 @@ class hangman():
 
 	def send_guess(self):
 		self.data = raw_input("Enter a guess: ")
-		self.sock.sendall(self.data + "\n")
+		if self.guessed.count(self.data) == 0:
+			self.guessed.append(self.data)
+			self.sock.sendall(self.data + "\n")
+		else:
+			print "you have already guessed this: try again\n"
+			send_guess()
 
 
 	def get_result(self):
@@ -54,11 +61,14 @@ class hangman():
 		
 	def update_game_state(self):
 		if (self.received < 0):
-			print("you guessed incorrectly...\n")
 			self.total_Wrong += 1
+			print("you guessed incorrectly:\t{} times\n".format(self.total_Wrong))
+			if self.total_Wrong == 3:
+				print "You guessed wrong too many times...\n\nYou Lose!\n\n"
+				game.sock.close()
 		
 		else:
-			print "you guessed correct...\n"
+			print ("you guessed correct!\nyour score is:\t{}".format(self.total_Right))
 			index = 0
 			while index < len(self.Word):
 				index = self.Word.find(self.data, index)
