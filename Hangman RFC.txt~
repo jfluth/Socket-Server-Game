@@ -1,51 +1,58 @@
-Jordan Fluth
-May 7th, 2014
-
-Multiplayer Web Game RFC
 
 
-Table of Contents:
-	1	Introduction
-		1.1	Servers
-		1.2	Clients
-		1.3	Game Session
+
+ Jordan Fluth																						[Page 1]
+ May 7th, 2014
+ 
+
+						Multiplayer Network Hangman Game RFC
+
+
+Table of Contents:																				
+
+	1	Introduction............................................................... 1
+		1.1	Servers.............................................................. 1
+		1.2	Clients.............................................................. 1
+		1.3	Game Session......................................................... 1
 	
-	2	Message Details
-		2.1	Connection
-
-
+	2	Message Details............................................................ 1
+		2.1	Connection........................................................... 1
+		2.2	Server-Client Messages............................................... 1
+		2.3	Client-Server Messages............................................... 1
 
 
  1		Introduction
 
-		The purpose of this document is to describe the protocol for a multiplayer network hangman game. 
-		This game can be played by a single player or by two players. Each player in the game will receive 
-		the same secret word from the server and who ever can guess it first wins, but to make too many 
-		wrong guesses otherwise you will lose and the other player will win whether they have solved the 
-		puzzle or not. 
+		The purpose of this document is to describe the protocol for a multiplayer network 
+		hangman game. This game can be played by a single player or by two players. Each 
+		player in the game will receive the same secret word from the server and who ever 
+		can guess it first wins, but to make too many wrong guesses otherwise you will lose 
+		and the other player will win whether they have solved the puzzle or not. 
 
 
 
  1.1	Servers
 
-		The server will be used as a point for clients to connect to and receive the current puzzle for the 
-		hangman game. The server is responsible for generating a hangman puzzle, keeping track of player 
-		scores, and notifying winners and losers. 
+		The server will be used as a point for clients to connect to and receive the current 
+		puzzle for the hangman game. The server is responsible for generating a hangman puzzle, 
+		keeping track of player scores, and notifying winners and losers. 
 
 
 
  1.2	Clients
 
-		A client is a player connecting to the server. Each client connects to the server and separate thread 
-		of the server is spun off for the connecting client. The server will support two clients at a time to 
-		play a hangman game.
+		A client is a player connecting to the server. Each client connects to the server and 
+		separate thread of the server is spun off for the connecting client. The server will 
+		support two clients at a time to play a hangman game.
 
 
 
  1.3	Game Session
 	
-		A game session is when is defined when two players have connected to the server and a new game is 
-		created. 
+		A game session is when is defined when two players have connected to the server and a 
+		new game is created. The game session will continue until either: A player solves
+		the puzzle and wins the game, a player guesses incorrectly too many times, or a player
+		loses its connection to the server.
 
 
 
@@ -53,15 +60,47 @@ Table of Contents:
 
  2.1 	Connection Details
 	
-		To start the server for hosting a hangman game, enter the following command on the command-line:
+		To start the server for hosting a hangman game, enter the following command on the 
+		command-line:
 
 			$: python threadedserver.py
 
-		To become a player in the hangman game and connect to the server, enter the one of the following 
-		commands on the command-line:
+		To become a player in the hangman game and connect to the server, enter the one of 
+		the following commands on the command-line:
 
 			$: python player1.py 
 
 			$: python player2.py
+			
+		When each player script is run it attempts to establish a connection to the server
+		who is listening. When the server sees the request it creates a new thread for the
+		client to use.
+			
+			
+			
+ 2.2	Server-Client Messages
+ 
+ 		There are a couple meesages that the server will send to the client. The first 
+ 		message is contains the secret word that the players will be guessing.
+ 		
+ 		The other type of message is whether the or not the players guess was correct.
+ 		
+ 		The last type of message the the server will send, is one to each of the players
+ 		notifying the winner and the loser after the game is over.
+ 		
+ 		
+ 		
+ 2.3	Client-Server Messages		 
+		
+		There are also several different messages that the client will sent to the server.
+		The first of which is the players guess. This message is a single letter in string
+		format.
+		
+		The client may send a message to solve the word. This message must be in a certain 
+		format. It must start with the keyword solve, semi-colon, followed by a space and 
+		the players guess. 
+		
+			<solve: players guess>		
+			
 
 
