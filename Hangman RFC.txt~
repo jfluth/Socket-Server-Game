@@ -1,14 +1,14 @@
 
 
 
- Jordan Fluth																						[Page 1]
+ Jordan Fluth																					
  May 7th, 2014
  
 
 						Multiplayer Network Hangman Game RFC
 
 
-Table of Contents:																				
+	Table of Contents:																				
 
 	1	Introduction............................................................... 1
 		1.1	Servers.............................................................. 1
@@ -16,10 +16,11 @@ Table of Contents:
 		1.3	Game Session......................................................... 1
 	
 	2	Message Details............................................................ 1
-		2.1	Connection........................................................... 1
-		2.2	Server-Client Messages............................................... 1
-		2.3	Client-Server Messages............................................... 1
-
+		2.1	Connection Details................................................... 1
+		2.2	Server-Client Messages............................................... 2
+		2.3	Client-Server Messages............................................... 2
+		2.4	Opertion............................................................. 2
+		
 
  1		Introduction
 
@@ -102,5 +103,16 @@ Table of Contents:
 		
 			<solve: players guess>		
 			
+ 2.4 	Operation
+ 		
+ 		After the connection between client and server has been established, the operation
+ 		of the program is quite simple. A player will enter the letter the are guessing, 
+ 		this is a single character, and press the <return> key. The only exception to this
+ 		is the when the player wishes to try and solve the puzzle, which is described 
+ 		above in section [2.3]. In this case, after the correct message format is entered,
+ 		the <return> key is again the only key pressed to send the message.
+ 
+ 
+ 
 
 
