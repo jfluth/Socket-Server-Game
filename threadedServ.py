@@ -20,10 +20,10 @@ class threaded_Serv():
 	def __init__(self):
 		self.total_length = len(Puzzle) - 1
 		self.player_score = 0
-		print Puzzle
+		#print Puzzle
 		
 				
-	def match(self, data):
+	def is_match(self, data):
 		index = 0
 		matches = 0
 		while index < len(Puzzle):
@@ -53,13 +53,10 @@ def handler(clientsock,addr):
 	while 1:
 		data = clientsock.recv(1024).strip()
 		if not data: break
-		print data
-		Index = server.match(data)
-		clientsock.sendall(str(Index) + "\n")
-		
-		
+		Index = server.is_match(data)
+		clientsock.sendall(str(Index) + "\n")	
 	clientsock.close()
-	print addr, "- closed connection" 
+	print addr, "- closed connection" + "\n"
 
 
 def is_winner():
@@ -79,23 +76,23 @@ def is_winner():
 			
 
 if __name__=='__main__':
-	'''---------------------- Generate Puzzle --------------------------'''
+	# Generate Puzzle 
 	generate = random.randint(1, 126)
 	Puzzle = linecache.getline('WordList.txt', generate)
 	end_game_msg = False
-	print Puzzle
+	os.system('cls' if os.name == 'nt' else 'clear')
+	print "\n" + Puzzle
 	threads = array('L', [])
 	thread_count = 0
 	
-
-	'''---------------------- Socket Setup ------------------------------'''	
+	# Socket Setup 	
 	ADDR = (HOST, PORT)
 	serversock = socket(AF_INET, SOCK_STREAM)
 	serversock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 	serversock.bind(ADDR)
 	serversock.listen(5)
 	
-	'''---------------------- Establish Connections ---------------------'''
+	# Establish Connections 
 	while 1:
 		print 'waiting for connection... listening on port', PORT
 		clientsock, addr = serversock.accept()
