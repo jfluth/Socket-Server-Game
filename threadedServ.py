@@ -1,9 +1,11 @@
 from socket import *
 from Tkinter import *
+from array import *
 import thread
 import math
 import linecache
 import random
+import os
 
 BUFF = 1024
 HOST = "localhost"
@@ -15,7 +17,6 @@ global end_game_msg
 
 
 class threaded_Serv():
-	
 	def __init__(self):
 		self.total_length = len(Puzzle) - 1
 		self.player_score = 0
@@ -28,15 +29,15 @@ class threaded_Serv():
 		while index < len(Puzzle):
 			index = Puzzle.find(data, index)
 			if index == -1:
-				break
+  				break
 			index += 1
-			if (index >= 0):
-				matches += 1
-				self.player_score += 1
+			matches += 1
+			self.player_score += 1
 		if matches == 0:
 			return -1
 		if self.player_score == self.total_length:
 			end_game_msg = True
+		os.system('cls' if os.name == 'nt' else 'clear')
 		print "Player Score is: {}".format(self.player_score)
 		return matches
 		
@@ -55,16 +56,27 @@ def handler(clientsock,addr):
 		print data
 		Index = server.match(data)
 		clientsock.sendall(str(Index) + "\n")
-
-			
+		
+		
 	clientsock.close()
 	print addr, "- closed connection" 
 
 
 def is_winner():
 	if end_game_msg:
-		print "Winner"
-		
+		if server.player_score == server.total_length:
+			print "Winner"
+			clientsock.sendall("You are the winner!" + "\n")
+			i = 0
+			while i <= thread_count:
+				threads[i].close()
+				i += 1
+			
+		else:
+			print "Loser"
+			clientsock.sendall("You are the loser!" + "\n")
+			
+			
 
 if __name__=='__main__':
 	'''---------------------- Generate Puzzle --------------------------'''
@@ -72,6 +84,8 @@ if __name__=='__main__':
 	Puzzle = linecache.getline('WordList.txt', generate)
 	end_game_msg = False
 	print Puzzle
+	threads = array('L', [])
+	thread_count = 0
 	
 
 	'''---------------------- Socket Setup ------------------------------'''	
@@ -86,6 +100,7 @@ if __name__=='__main__':
 		print 'waiting for connection... listening on port', PORT
 		clientsock, addr = serversock.accept()
 		print '...connected from:', addr
-		thread.start_new_thread(handler, (clientsock, addr))
+		threads.append(thread.start_new_thread(handler, (clientsock, addr)))
+		thread_count += 1
 		
 		

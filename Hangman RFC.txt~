@@ -15,11 +15,19 @@
 		1.2	Clients.............................................................. 1
 		1.3	Game Session......................................................... 1
 	
-	2	Message Details............................................................ 1
-		2.1	Connection Details................................................... 1
-		2.2	Server-Client Messages............................................... 2
-		2.3	Client-Server Messages............................................... 2
-		2.4	Opertion............................................................. 2
+	2 	Connection Details......................................................... 2
+		2.1	Opertion............................................................. 2
+	
+	3	Message Details............................................................ 2
+		3.1	Message Format....................................................... 2
+		3.2	Acceptable Message Format............................................ 2
+		3.3	Server-Client Messages............................................... 2
+		3.4	Client-Server Messages............................................... 3
+		
+	4	Terminating the Connection................................................. 3
+		4.1	Game Completion...................................................... 3
+		4.2	Early Termination.................................................... 3
+		4.3	Unexpected Termination............................................... 3
 		
 
  1		Introduction
@@ -50,36 +58,76 @@
 
  1.3	Game Session
 	
-		A game session is when is defined when two players have connected to the server and a 
+		A game session is defined when two players have connected to the server and a 
 		new game is created. The game session will continue until either: A player solves
 		the puzzle and wins the game, a player guesses incorrectly too many times, or a player
 		loses its connection to the server.
 
 
 
- 2 	Message Details
-
- 2.1 	Connection Details
+ 2 	Connection Details
 	
 		To start the server for hosting a hangman game, enter the following command on the 
 		command-line:
 
 			$: python threadedserver.py
+			
 
-		To become a player in the hangman game and connect to the server, enter the one of 
-		the following commands on the command-line:
+		To become a player in the hangman game and connect to the server, enter the 
+		following command on the command-line:
 
-			$: python player1.py 
-
-			$: python player2.py
+			$: python player.py 
+			
 			
 		When each player script is run it attempts to establish a connection to the server
 		who is listening. When the server sees the request it creates a new thread for the
 		client to use.
+ 
+ 
+ 
+ 2.1 	Operation
+ 		
+ 		After the connection between client and server has been established, the operation
+ 		of the program is quite simple. A player will enter the letter the are guessing, 
+ 		this is a single character, and press the <return> key. The only exception to this
+ 		is the when the player wishes to try and solve the puzzle, which is described 
+ 		above in section [2.3]. In this case, after the correct message format is entered,
+ 		the <return> key is again the only key pressed to send the message.
 			
 			
 			
- 2.2	Server-Client Messages
+ 3 	Message Details	
+ 
+ 		In this game, the message can be a variable size. This is done with the built in 
+ 		sendall() function from the Socketserver library. 
+ 		
+ 		The sender can be either the client or the server. The sender will send a variable
+ 		sized message, and the receiver listening on the other end will have a pre-defined
+ 		buffer to store the received message. The buffer size is set to 1024 bytes to 
+ 		assure the entire message is recieved. 
+ 		
+ 		The sendall() function will continuousy send the data of the message to the socket
+ 		which makes this implementation preferred over a fixed length message because it 
+ 		assures that the entire message was sent. If the entire message is not sent an 
+ 		exception is thrown and the sender will resend the 
+ 		
+ 		
+ 		
+ 3.1	Message Format
+ 		The format for the data section of the messages between the client and server are
+ 		string type.
+ 		
+ 		
+ 		
+ 3.2 	Acceptable Message Format
+ 
+ 		<keywords>	::= 'solve' | 'exit'
+ 		<letters> 	::= 'a' ... 'z' | 'A' ... 'Z'
+ 		<special> 	::= ':'
+ 		
+ 				
+ 						
+ 3.3	Server-Client Messages
  
  		There are a couple meesages that the server will send to the client. The first 
  		message is contains the secret word that the players will be guessing.
@@ -91,7 +139,7 @@
  		
  		
  		
- 2.3	Client-Server Messages		 
+ 3.4	Client-Server Messages		 
 		
 		There are also several different messages that the client will sent to the server.
 		The first of which is the players guess. This message is a single letter in string
@@ -102,17 +150,54 @@
 		the players guess. 
 		
 			<solve: players guess>		
+
 			
- 2.4 	Operation
+
+ 4 	Terminating the Connection
  		
- 		After the connection between client and server has been established, the operation
- 		of the program is quite simple. A player will enter the letter the are guessing, 
- 		this is a single character, and press the <return> key. The only exception to this
- 		is the when the player wishes to try and solve the puzzle, which is described 
- 		above in section [2.3]. In this case, after the correct message format is entered,
- 		the <return> key is again the only key pressed to send the message.
- 
- 
- 
+ 		The client can terminate the connection in three ways: 
+ 			
+ 			Game Completion - If a player wins the game, all clients in that game are 
+ 					notified and they will terminate their connections.
+ 			
+ 			Early Termination - A player may leave the game early by entering 'exit' as 
+ 					their guess. The client will recognize this keyword and close the 
+ 					connection.
+ 			
+ 			Unexpected Termination - A player may abruptly terminate the connection by 
+ 					closing the terminal window or by pressing cntrl 'c' on the keyboard.
 
 
+
+ 4.1	Game Completion
+ 
+		When a player wins the game the server will send a message
+		to all of the clients in that game telling them the game is complete and 
+		to close	their connection.		
+ 		
+ 		
+
+ 4.2	Early termination
+ 
+ 		If the player decides to exit the game before the game has completed, they may 
+ 		send an <exit> command. When the client check the players guess for correctness
+ 		it will look for the 'exit' keyword. If it matches the entry with 'exit' it will 
+ 		close the connection. When a client closes a connection the server will 
+ 		automatically close the connetion it had with that client.
+ 		
+ 		If desired, the server may be terminated during a game. If the server recieves
+ 		a message with the keyword 'servexit', it will tell all clients to close their 
+ 		connections, and then it will terminate itself.
+ 
+ 
+ 
+ 4.3	Unexpected termination
+ 
+ 		If the client unexpectedly terminates, either by closing the terminal, or by 
+ 		pressing cntrl 'c' on the keyboard, the server will automaically close the 
+ 		connection.  
+ 
+ 		If the server unexpectedly terminates the connection, there is no way to notify 
+ 		the clients that is has closed. Therefore when the client attempts to send its 
+ 		next message it will no longer have the socket connection and the program will 
+ 		terminate.
