@@ -20,7 +20,7 @@ class threaded_Serv():
 	def __init__(self):
 		self.total_length = len(Puzzle) - 1
 		self.player_score = 0
-		print Puzzle
+		#print Puzzle
 		
 				
 	def is_match(self, data):
@@ -56,7 +56,7 @@ def handler(clientsock,addr):
 		Index = server.is_match(data)
 		clientsock.sendall(str(Index) + "\n")	
 	clientsock.close()
-	print addr, "- closed connection" 
+	print addr, "- closed connection" + "\n"
 
 
 def is_winner():
