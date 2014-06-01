@@ -1,5 +1,4 @@
 from socket import *
-from Tkinter import *
 from array import *
 import thread
 import math
@@ -47,6 +46,7 @@ class threaded_Serv():
 		
 		if development:
 			print "Player Score is: {}".format(self.player_score)
+
 		return matches
 		
 
