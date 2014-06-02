@@ -46,9 +46,6 @@ class threaded_Serv():
 		if matches == 0:
 			return -1
 		
-		'''if self.player_score == self.total_length:
-			end_game_msg = True'''
-		
 		os.system('cls' if os.name == 'nt' else 'clear')
 		
 		if development:
@@ -98,26 +95,7 @@ def handler(clientsock,addr):
 				
 	clientsock.close()
 	print addr, "- closed connection" + "\n"
-
-
-
-'''
-def is_winner():
-	if end_game_msg:
-		if server.player_score == server.total_length:
-			print "Winner"
-			clientsock.sendall("You are the winner!" + "\n")
-			
-			for i in range (i, thread_count):
-				threads[i].close()
-				i += 1
-			
-		else:
-			print "Loser"
-			clientsock.sendall("You are the loser!" + "\n")
-	#else:
-		#send
-'''			
+		
 			
 
 if __name__=='__main__':

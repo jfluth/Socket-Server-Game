@@ -77,6 +77,8 @@ def handler(clientsock,addr):
 		clientsock.sendall(str(Index) + "\n")
 
 		gameover = clientsock.recv(4096)
+		if end_game_msg:
+			gameover = 'n'
 		
 		if gameover == 'y':
 			end_game_msg = True
