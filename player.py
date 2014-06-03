@@ -8,8 +8,9 @@
 	Description: This is a spin on the classic hangman game.
 	
 	Rules:
-		1)
-		2)
+		1) First player to solve the game wins.
+		2) If you have seven misses or if you are not the first player
+		   to solve the puzzle you lose.
 
 -----------------------------------------------------------'''
 
@@ -19,6 +20,8 @@ import subprocess
 import os
 import time
 from array import *
+
+global endGame
 
 # constants
 game_state = (
@@ -148,16 +151,17 @@ class hangman():
 		print "\n" + game_state[self.total_Wrong]
 		print "\n" + "\t" + self.wordMask
 		print ("\nYou guessed correct:\t\t{} times".format(self.total_Right))
-		print("You guessed incorrectly:\t{} times\n".format(self.total_Wrong))
-		#print("\nGame status:\t\t{}\n".format(self.gstatus))	
+		print("You guessed incorrectly:\t{} times\n".format(self.total_Wrong))	
 
 	def send_guess(self):
-		self.data = raw_input("Enter a guess: ")
-		
+		self.data = str(raw_input("Enter a guess: "))
+		self.data = str(self.data[0])
+
 		while self.guessed.count(self.data) != 0:
 			print "\nYou have already guessed this: try again"
-			self.data = raw_input("Enter a guess: ")
-		
+			self.data = str(raw_input("Enter a guess: "))
+			self.data = str(self.data[0])
+
 		self.guessed.append(self.data)
 		self.sock.sendall(self.data + "\n")
 
@@ -168,11 +172,7 @@ class hangman():
 	def update_game_state(self):
 		if (self.received < 0):
 			self.total_Wrong += 1
-			
-			if self.total_Wrong >= 7:
-				print "\nYou've been hung!\n"
-				self.sock.close()
-		
+
 		else:
 			index = 0
 			
@@ -191,6 +191,7 @@ class hangman():
 		
 	
 	def is_done(self):
+		global endGame
 		if self.total_Right == (len(self.Word) - 1):
 			self.sock.sendall("y")
 			
@@ -205,18 +206,21 @@ class hangman():
 		if self.check == 'W':
 			os.system('cls' if os.name == 'nt' else 'clear')
 			print "You are the Winner!"
+			endGame = 1
 			time.sleep(3)
 			self.sock.close()
 		
 		elif self.check == 'H':
 			os.system('cls' if os.name == 'nt' else 'clear')
 			print "You've been hanged! - You Lose -"
+			endGame = 1
 			time.sleep(3)
 			self.sock.close()
 		
 		elif self.check == 'L':
 			os.system('cls' if os.name == 'nt' else 'clear')
 			print "You are the Loser!"
+			endGame = 1
 			time.sleep(3)
 			self.sock.close()
 		
@@ -227,12 +231,12 @@ class hangman():
 
 if __name__ == "__main__":
 	game = hangman()
-
+	endGame = 0
 	try:
 		game.connect()
 		game.game_setup()
 	
-		while (game.total_Right < game.total_Length):
+		while (game.total_Right < game.total_Length) and (endGame == 0):
 			game.send_guess()
 			game.get_result()
 			game.update_game_state()

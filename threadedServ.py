@@ -16,6 +16,7 @@ global server
 global end_game_msg
 global gameover
 global thread_count
+global player_hung
 thread_count = 0
 development = 1
 threads = []
@@ -63,36 +64,54 @@ def response(key):
 def handler(clientsock,addr):
 
 	global end_game_msg
+	global thread_count
+	global player_hung
 	server = threaded_Serv()
 	clientsock.sendall(Puzzle)
 	
 
 	while 1:
+		print thread_count
 		data = clientsock.recv(4096).strip()
 		if not data: break
 		Index = server.is_match(data)
 		clientsock.sendall(str(Index) + "\n")
 
 		gameover = clientsock.recv(4096)
+			
 		if end_game_msg:
 			gameover = 'n'
 		
 		if gameover == 'y':
 			end_game_msg = True
+			
+		if gameover == 'h':
+			end_game_msg = True
+			
 		
 		if end_game_msg:
 			
-			if gameover == 'y':
+			if (gameover == 'y') or (player_hung == 1):
 				clientsock.sendall("W")
-				#time.sleep(3)
+		
+			
+			elif gameover == 'h':
+				clientsock.sendall("H")
+				player_hung = 1
+		
 			
 			elif gameover == 'n':
 				clientsock.sendall("L")
-				#time.sleep(3)
-		
+				
+			break
+			
 		else:
 			clientsock.sendall("C")
-				
+			
+	thread_count -= 1
+	print thread_count
+	if thread_count == 0:
+		end_game_msg = False		
 	clientsock.close()
 	print addr, "- closed connection" + "\n"
 		
@@ -102,7 +121,7 @@ if __name__=='__main__':
 	# Generate Puzzle 
 	generate = random.randint(1, 126)
 	Puzzle = linecache.getline('WordList.txt', generate)
-	
+	player_hung = 0
 	end_game_msg = False
 	
 	os.system('cls' if os.name == 'nt' else 'clear')
@@ -123,9 +142,8 @@ if __name__=='__main__':
 		print '...connected from:', addr
 		t = thread.start_new_thread(handler, (clientsock, addr));
 
-		#t = threading.Thread(target=handler, args=(thread_count,))
 		threads.append(t)
+		thread_count += 1
 
-		#(thread.start_new_thread(handler, (clientsock, addr)))
 		
 		
